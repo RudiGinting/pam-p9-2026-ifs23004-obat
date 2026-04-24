@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "org.delcom.pam_p9_2026_ifs23004"
+    namespace = "org.delcom.pam_p9_2026_ifs18005"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

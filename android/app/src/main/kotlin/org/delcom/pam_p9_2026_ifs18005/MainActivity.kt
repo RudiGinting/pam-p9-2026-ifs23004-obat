@@ -1,4 +1,4 @@
-package org.delcom.pam_p9_2026_ifs23004
+package org.delcom.pam_p9_2026_ifs18005
 
 import io.flutter.embedding.android.FlutterActivity
 

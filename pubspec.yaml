@@ -1,5 +1,5 @@
-name: pam_p9_2026_ifs23004
-description: "Delcom Medicine Information with AI Generate"
+name: pam_p9_2026_ifs18005
+description: "Delcom Motivations with AI Generate"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -28,8 +28,8 @@ flutter_launcher_icons:
   image_path: "assets/images/logo.png"
 
 launcher_name:
-  default: "Delcom Medicine"  # Diubah dari Motivation ke Medicine
-  id: "Delcom Medicine"       # Diubah dari Motivation ke Medicine
+  default: "Delcom Motivation"
+  id: "Delcom Motivation"
 
 flutter:
   uses-material-design: true
