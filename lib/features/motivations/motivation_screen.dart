@@ -46,8 +46,9 @@ class _MotivationScreenState extends State<MotivationScreen> {
 
     // Saran jenis obat
     final List<String> suggestions = [
-      'Antibiotik', 'Antiviral', 'Vitamin C',
-      'Obat Batuk', 'Antinyeri', 'Antialergi',
+      'Paracetamol', 'Amoksisilin', 'Vitamin C',
+      'Obat Batuk OBH', 'Ibuprofen', 'Antalgin',
+      'Cetirizine', 'Promag'
     ];
 
     showDialog(
@@ -71,14 +72,14 @@ class _MotivationScreenState extends State<MotivationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Jenis / Nama Obat",
+                    "Nama Obat",
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   SizedBox(height: 6),
                   TextField(
                     controller: themeController,
                     decoration: InputDecoration(
-                      hintText: "Contoh: Paracetamol, Antibiotik...",
+                      hintText: "Contoh: Paracetamol, Amoksisilin...",
                       prefixIcon: Icon(Icons.medication),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -96,7 +97,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    "Jumlah Info Obat",
+                    "Jumlah Informasi",
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   SizedBox(height: 6),
@@ -104,7 +105,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
                     controller: totalController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      hintText: "Contoh: 3",
+                      hintText: "Contoh: 3 (maksimal 10)",
                       prefixIcon: Icon(Icons.format_list_numbered),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -131,9 +132,22 @@ class _MotivationScreenState extends State<MotivationScreen> {
                   onPressed: provider.isGenerating
                       ? null
                       : () async {
+                    if (themeController.text.isEmpty) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        SnackBar(
+                          content: Text("Nama obat harus diisi"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+                    int total = int.tryParse(totalController.text) ?? 3;
+                    if (total > 10) total = 10;
+                    if (total < 1) total = 1;
+
                     await provider.generate(
                       themeController.text,
-                      int.parse(totalController.text),
+                      total,
                     );
                     Navigator.pop(dialogContext);
                   },
@@ -150,7 +164,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
                         ),
                       ),
                       SizedBox(width: 10),
-                      Text("Memproses..."),
+                      Text("Mencari..."),
                     ],
                   )
                       : Text("Cari Info Obat"),
@@ -278,9 +292,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
                             horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          color: isDark
-                              ? Color(0xFF283593)
-                              : Colors.white,
+                          color: isDark ? Color(0xFF283593) : Colors.white,
                           border: Border.all(
                             color: isDark
                                 ? Color(0xFF2196F3).withValues(alpha: 0.3)
@@ -307,8 +319,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
                                   Row(
                                     children: [
                                       Text(emoji,
-                                          style:
-                                          TextStyle(fontSize: 20)),
+                                          style: TextStyle(fontSize: 20)),
                                       SizedBox(width: 8),
                                       Container(
                                         padding: EdgeInsets.symmetric(
