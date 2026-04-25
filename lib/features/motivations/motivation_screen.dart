@@ -37,13 +37,22 @@ class _MotivationScreenState extends State<MotivationScreen> {
     }
   }
 
+  // Daftar emoji obat-obatan untuk variasi tampilan
+  final List<String> medicineEmojis = ['💊', '💉', '🩺', '🌿', '🧪', '📋', '🏥', '❤️'];
+
   void showGenerateDialog() {
     final themeController = TextEditingController();
     final totalController = TextEditingController();
 
+    // Saran jenis obat
+    final List<String> suggestions = [
+      'Antibiotik', 'Antiviral', 'Vitamin C',
+      'Obat Batuk', 'Antinyeri', 'Antialergi',
+    ];
+
     showDialog(
       context: context,
-      barrierDismissible: false, // 🔥 biar gak bisa close saat loading
+      barrierDismissible: false,
       builder: (dialogContext) {
         return Consumer<MotivationProvider>(
           builder: (context, provider, _) {
@@ -53,28 +62,50 @@ class _MotivationScreenState extends State<MotivationScreen> {
               ),
               title: Row(
                 children: [
-                  Text("✨ "),
-                  Text("Generate Motivasi"),
+                  Text("💊 "),
+                  Text("Info Obat"),
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    "Jenis / Nama Obat",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 6),
                   TextField(
                     controller: themeController,
                     decoration: InputDecoration(
-                      labelText: "Theme",
+                      hintText: "Contoh: Paracetamol, Antibiotik...",
+                      prefixIcon: Icon(Icons.medication),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
+                  SizedBox(height: 8),
+                  // Chip saran obat
+                  Wrap(
+                    spacing: 6,
+                    children: suggestions.map((s) => ActionChip(
+                      label: Text(s, style: TextStyle(fontSize: 11)),
+                      onPressed: () => themeController.text = s,
+                    )).toList(),
+                  ),
                   SizedBox(height: 12),
+                  Text(
+                    "Jumlah Info Obat",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 6),
                   TextField(
                     controller: totalController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: "Total",
+                      hintText: "Contoh: 3",
+                      prefixIcon: Icon(Icons.format_list_numbered),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -83,15 +114,20 @@ class _MotivationScreenState extends State<MotivationScreen> {
                 ],
               ),
               actions: [
-                // ❌ cancel hanya aktif kalau tidak loading
                 TextButton(
                   onPressed: provider.isGenerating
                       ? null
                       : () => Navigator.pop(dialogContext),
-                  child: Text("Cancel"),
+                  child: Text("Batal"),
                 ),
-
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF2196F3),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   onPressed: provider.isGenerating
                       ? null
                       : () async {
@@ -101,8 +137,6 @@ class _MotivationScreenState extends State<MotivationScreen> {
                     );
                     Navigator.pop(dialogContext);
                   },
-
-                  // 🔥 LOADING DI BUTTON
                   child: provider.isGenerating
                       ? Row(
                     mainAxisSize: MainAxisSize.min,
@@ -116,10 +150,10 @@ class _MotivationScreenState extends State<MotivationScreen> {
                         ),
                       ),
                       SizedBox(width: 10),
-                      Text("Generating..."),
+                      Text("Memproses..."),
                     ],
                   )
-                      : Text("Generate"),
+                      : Text("Cari Info Obat"),
                 ),
               ],
             );
@@ -132,127 +166,241 @@ class _MotivationScreenState extends State<MotivationScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MotivationProvider>();
-    final theme = context.watch<ThemeNotifier>();
+    final themeNotifier = context.watch<ThemeNotifier>();
+    final isDark = themeNotifier.themeMode == ThemeMode.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? Color(0xFF1A237E) : Color(0xFFE3F2FD),
       appBar: AppBar(
-        title: Text(
-          "Delcom Motivation",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        backgroundColor: isDark ? Color(0xFF283593) : Color(0xFF2196F3),
+        foregroundColor: Colors.white,
+        title: Row(
+          children: [
+            Text("💊 "),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Delcom Medicine",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                Text(
+                  "Informasi Obat Terpercaya",
+                  style: TextStyle(fontSize: 11, color: Colors.white70),
+                ),
+              ],
+            ),
+          ],
         ),
         centerTitle: false,
         actions: [
           IconButton(
-            icon: Icon(Icons.dark_mode),
-            onPressed: theme.toggleTheme,
+            icon: Icon(isDark ? Icons.wb_sunny : Icons.dark_mode),
+            onPressed: themeNotifier.toggleTheme,
           ),
         ],
       ),
 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: showGenerateDialog,
-        icon: Icon(Icons.auto_awesome),
-        label: Text("Generate"),
-        backgroundColor: Color(0xFF6366F1),
+        icon: Icon(Icons.medication),
+        label: Text("Info Obat"),
+        backgroundColor: Color(0xFF2196F3),
         foregroundColor: Colors.white,
       ),
 
       body: Stack(
         children: [
-          Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.only(bottom: 120),
-              itemCount: provider.motivations.length + 1,
-              itemBuilder: (context, index) {
-                if (index < provider.motivations.length) {
-                  final item = provider.motivations[index];
-                  final number = index + 1;
-
-                  return Container(
-                    margin:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    padding: EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xFF6366F1),
-                          Color(0xFF8B5CF6),
-                        ],
+          Column(
+            children: [
+              // Banner info
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                color: isDark ? Color(0xFF283593) : Color(0xFFBBDEFB),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline,
+                        color: Color(0xFF2196F3), size: 18),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Tap '💊 Info Obat' untuk mendapatkan informasi lengkap tentang obat",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white70 : Color(0xFF1565C0),
+                        ),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 12,
-                          offset: Offset(0, 6),
-                        )
-                      ],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  ],
+                ),
+              ),
 
-                        // 🔥 HEADER
-                        Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "#$number",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              formatDate(item.createdAt),
-                              style: TextStyle(
-                                color: Colors.white60,
-                                fontSize: 11,
-                              ),
+              // List info obat
+              Expanded(
+                child: provider.motivations.isEmpty && !provider.isLoading
+                    ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("💊", style: TextStyle(fontSize: 64)),
+                      SizedBox(height: 16),
+                      Text(
+                        "Belum ada informasi obat",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white70 : Color(0xFF1565C0),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Tap tombol '💊 Info Obat' untuk mulai mencari",
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                    : ListView.builder(
+                  controller: _scrollController,
+                  padding: EdgeInsets.only(top: 8, bottom: 120),
+                  itemCount: provider.motivations.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index < provider.motivations.length) {
+                      final item = provider.motivations[index];
+                      final number = index + 1;
+                      final emoji = medicineEmojis[index % medicineEmojis.length];
+
+                      return Container(
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: isDark
+                              ? Color(0xFF283593)
+                              : Colors.white,
+                          border: Border.all(
+                            color: isDark
+                                ? Color(0xFF2196F3).withValues(alpha: 0.3)
+                                : Color(0xFF90CAF9),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
                             ),
                           ],
                         ),
-
-                        SizedBox(height: 12),
-
-                        Text(
-                          item.text,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            height: 1.5,
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(emoji,
+                                          style:
+                                          TextStyle(fontSize: 20)),
+                                      SizedBox(width: 8),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF2196F3)
+                                              .withValues(alpha: 0.15),
+                                          borderRadius:
+                                          BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          "Info #$number",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF2196F3),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    formatDate(item.createdAt),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isDark
+                                          ? Colors.white38
+                                          : Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                item.text,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  height: 1.6,
+                                  color: isDark ? Colors.white.withValues(alpha: 0.87) : Colors.grey[800],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return provider.isLoading
-                      ? Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 8),
-                        Text("Loading..."),
-                      ],
-                    ),
-                  )
-                      : SizedBox();
-                }
-              },
-            ),
+                      );
+                    } else {
+                      return provider.isLoading
+                          ? Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            CircularProgressIndicator(
+                              color: Color(0xFF2196F3),
+                            ),
+                            SizedBox(height: 8),
+                            Text("Memuat info obat..."),
+                          ],
+                        ),
+                      )
+                          : SizedBox();
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
 
-          // 🔥 OVERLAY LOADING GENERATE
+          // Overlay loading saat generate
           if (provider.isGenerating)
             Container(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withValues(alpha: 0.4),
               child: Center(
-                child: CircularProgressIndicator(),
+                child: Container(
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("💊", style: TextStyle(fontSize: 40)),
+                      SizedBox(height: 12),
+                      CircularProgressIndicator(color: Color(0xFF2196F3)),
+                      SizedBox(height: 12),
+                      Text(
+                        "Mencari informasi obat...",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
         ],
