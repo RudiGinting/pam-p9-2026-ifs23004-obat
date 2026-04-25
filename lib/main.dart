@@ -5,6 +5,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_notifier.dart';
 import 'providers/motivation_provider.dart';
 import 'features/motivations/motivation_screen.dart';
+import 'features/auth/login_screen.dart'; // Tambahan import login
 
 void main() {
   runApp(MyApp());
@@ -25,7 +26,15 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: theme.themeMode,
-            home: MotivationScreen(),
+
+            // Ganti halaman awal ke LoginScreen
+            home: LoginScreen(),
+
+            // Opsional: kalau nanti mau navigasi pakai route
+            routes: {
+              '/login': (_) => LoginScreen(),
+              '/home': (_) => MotivationScreen(),
+            },
           );
         },
       ),
